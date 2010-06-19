@@ -19,32 +19,42 @@ module Commands
       super
     
       put "Retrieving latest #{plural_type} from Pivotal Tracker..."
-
-      unless story
+      
+      unless stories
         put "No #{plural_type} available!"
         return 0
       end
     
-      put "Story: #{story.name}"
-      put "URL:   #{story.url}"
-
+      stories.each_with_index do |story, index|
+        put "#{index}):"
+        put "Story:  #{story.name}"
+        put "URL:    #{story.url}"
+        put "Labels: #{story.labels}"
+        put ""
+      end
+      
+      put ""
+      put "Choose #{plural_type} [0]: ", false
+      story_no = input.gets.chomp.to_i
+      story_no = 0 if story_no == ""
+      story = stories[story_no]
+      
       put "Updating #{type} status in Pivotal Tracker..."
       if story.start!(:owned_by => options[:full_name])
-    
         suffix = branch_suffix
         unless options[:quiet]
           put "Enter branch name (will be prepended by #{story.id}) [#{suffix}]: ", false
           suffix = input.gets.chomp
-      
+        
           suffix = "feature" if suffix == ""
         end
-
+        
         branch = "#{story.id}-#{suffix}"
         if get("git branch").match(branch).nil?
           put "Creating #{branch} branch..."
           sys "git checkout -b #{branch}"
         end
-    
+        
         return 0
       else
         put "Unable to mark #{type} as started"
@@ -55,8 +65,8 @@ module Commands
 
   protected
 
-    def story
-      @story ||= project.stories.find(:conditions => { :story_type => type, :current_state => :unstarted }, :limit => 1).first
+    def stories
+      @stories ||= project.stories.find(:conditions => { :story_type => type, :current_state => :unstarted }, :limit => 5)
     end
   end
 end
