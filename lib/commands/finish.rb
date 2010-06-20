@@ -19,6 +19,11 @@ module Commands
 
         put "Removing #{current_branch} branch"
         sys "git branch -d #{current_branch}"
+        
+        put "Do you want to remove #{current_branch} from origin? [y|N]: ", false
+        if input.gets.chomp.downcase == "y"
+          sys "git push origin :#{current_branch}"
+        end
 
         return 0
       else
