@@ -24,7 +24,7 @@ module Commands
       end
       put "#{msg}..."
       
-      unless story
+      unless stories
         put "No #{plural_type} available!"
         return 0
       end
